@@ -511,7 +511,11 @@ def main():
                     st.error("❌ No data was scraped. Please check the logs above.")
         
         except Exception as e:
-            st.error(f"❌ Error loading file: {str(e)}")
+            import traceback
+            error_details = traceback.format_exc()
+            st.error(f"❌ Error: {str(e)}")
+            with st.expander("🔍 Error Details"):
+                st.code(error_details)
     
     else:
         # Show sample format
