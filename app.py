@@ -106,28 +106,29 @@ def clean_html(text):
 
 def get_data(data, headers, progress_callback=None):
     try:
-        # Try to extract ID from various possible column names
+        # Extract ID from data - try multiple approaches
         ID_from_input = ""
         
-        # Check for URL column (various possible names)
-        for url_col in ["url", "URL", "Url", "product_url", "Product URL", "link", "Link"]:
-            if url_col in data and data[url_col]:
-                ID_from_input = str(data[url_col]).split("/p-")[-1]
-                break
-        
-        # If no URL found, check for ID column
-        if not ID_from_input:
-            for id_col in ["id", "ID", "Id", "product_id", "Product ID", "productId"]:
-                if id_col in data and data[id_col]:
-                    ID_from_input = str(data[id_col])
+        # Look through all keys in the data dictionary
+        for key, value in data.items():
+            if value and isinstance(value, str):
+                # Check if it's a URL
+                if "tatacliq.com" in value and "/p-" in value:
+                    ID_from_input = value.split("/p-")[-1]
+                    break
+                # Check if it looks like a product ID
+                elif value.startswith("mp") or value.startswith("MP"):
+                    ID_from_input = value
                     break
         
         # If still no ID found, return error
         if not ID_from_input:
             if progress_callback:
-                progress_callback(f"❌ No URL or ID found in row. Available columns: {list(data.keys())}")
+                progress_callback(f"❌ No valid URL or product ID found in row. Columns: {list(data.keys())}")
             return None
         
+        # Clean up the ID
+        ID_from_input = ID_from_input.strip()
         newid = ID_from_input.upper()
         
         product_url = f"https://www.tatacliq.com/marketplacewebservices/v2/mpl/products/productDetails/{ID_from_input.upper()}?isPwa=true&isMDE=true&isDynamicVar=true"
@@ -432,14 +433,19 @@ def main():
             df = df_raw.to_dict("records")
             st.success(f"✅ Loaded {len(df)} products from file")
             
-            # Validate columns
-            columns = list(df_raw.columns)
-            has_url = any(col.lower() in ['url', 'product_url', 'link'] for col in columns)
-            has_id = any(col.lower() in ['id', 'product_id', 'productid'] for col in columns)
+            # Check if there's any URL or ID in the data
+            has_valid_data = False
+            first_row = df[0] if len(df) > 0 else {}
             
-            if not has_url and not has_id:
-                st.error(f"❌ Excel file must have either a 'url' or 'id' column. Found columns: {columns}")
-                st.info("💡 Rename your column to 'url' or 'id' and re-upload the file.")
+            for value in first_row.values():
+                if value and isinstance(value, str):
+                    if "tatacliq.com" in str(value) or str(value).startswith("mp") or str(value).startswith("MP"):
+                        has_valid_data = True
+                        break
+            
+            if not has_valid_data:
+                st.error(f"❌ No TataCliq URLs or product IDs found. Please check your Excel file.")
+                st.info("💡 Your Excel should have a column with TataCliq URLs (e.g., https://www.tatacliq.com/.../p-mp000000012345678)")
                 st.stop()
             
             # Show preview
