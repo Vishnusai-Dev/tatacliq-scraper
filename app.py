@@ -115,21 +115,28 @@ def get_data(data, headers, progress_callback=None):
                 # Check if it's a URL
                 if "tatacliq.com" in value and "/p-" in value:
                     ID_from_input = value.split("/p-")[-1]
+                    if progress_callback:
+                        progress_callback(f"🔍 Found URL in column '{key}': {value[:50]}...")
                     break
                 # Check if it looks like a product ID
                 elif value.startswith("mp") or value.startswith("MP"):
                     ID_from_input = value
+                    if progress_callback:
+                        progress_callback(f"🔍 Found ID in column '{key}': {value}")
                     break
         
         # If still no ID found, return error
         if not ID_from_input:
             if progress_callback:
-                progress_callback(f"❌ No valid URL or product ID found in row. Columns: {list(data.keys())}")
+                progress_callback(f"❌ No valid URL or product ID found in row. Columns: {list(data.keys())}, Values: {[str(v)[:30] for v in data.values()]}")
             return None
         
         # Clean up the ID
         ID_from_input = ID_from_input.strip()
         newid = ID_from_input.upper()
+        
+        if progress_callback:
+            progress_callback(f"🎯 Processing product ID: {newid}")
         
         product_url = f"https://www.tatacliq.com/marketplacewebservices/v2/mpl/products/productDetails/{ID_from_input.upper()}?isPwa=true&isMDE=true&isDynamicVar=true"
         res = requests.get(product_url, headers=headers, timeout=15)
@@ -400,8 +407,11 @@ def get_data(data, headers, progress_callback=None):
         return deepcopy(data)
         
     except Exception as error:
+        import traceback
+        error_details = traceback.format_exc()
         if progress_callback:
-            progress_callback(f"❌ Error in ID {ID_from_input}: {str(error)}")
+            progress_callback(f"❌ Error processing product: {str(error)}")
+            progress_callback(f"📋 Details: {error_details[:200]}")
         return None
 
 # Streamlit UI
