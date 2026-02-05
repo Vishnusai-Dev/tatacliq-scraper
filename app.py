@@ -471,8 +471,8 @@ def main():
                 logs = []
                 
                 def update_progress(msg):
+                    # Just append to logs list - don't update UI from thread
                     logs.append(msg)
-                    log_area.text_area("📝 Progress Log", "\n".join(logs[-10:]), height=200)
                 
                 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                     futures = {executor.submit(get_data, item, HEADERS, update_progress): item for item in df}
@@ -486,6 +486,9 @@ def main():
                         progress = completed / len(df)
                         progress_bar.progress(progress)
                         status_text.text(f"Progress: {completed}/{len(df)} products")
+                        
+                        # Update logs in main thread (not in background thread)
+                        log_area.text_area("📝 Progress Log", "\n".join(logs[-20:]), height=200, key=f"log_{completed}")
                 
                 if all_data:
                     result_df = pd.DataFrame(all_data)
