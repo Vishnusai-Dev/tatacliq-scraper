@@ -23,13 +23,16 @@ HEADERS = {
     'accept-language': 'en-US,en;q=0.9',
     'mode': 'no-cors',
     'priority': 'u=1, i',
+    'referer': 'https://www.tatacliq.com/woodland-green-beige-cotton-regular-fit-checks-shirt/p-mp000000026178350',
     'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
     'sec-fetch-dest': 'empty',
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
+    'traceparent': '00-8b3b2dcab752545736c44e95b54fd9c7-bc37579baa6a5d3a-01',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+    'cookie': 'jarvis-id=4600cb17-1ed4-4953-85e8-791372bb0b05; _fbp=fb.1.1758693786645.701455273689652587; _scid=nB5h3bG-ebSiofe7JRGwv70jLV44TaAv',
 }
 
 # Size guide helpers
